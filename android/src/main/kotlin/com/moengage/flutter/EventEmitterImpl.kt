@@ -1,6 +1,6 @@
 package com.moengage.flutter
 
-import com.moengage.core.Logger
+import com.moengage.core.internal.logger.Logger
 import com.moengage.plugin.base.EventEmitter
 import com.moengage.plugin.base.inAppCampaignToJson
 import com.moengage.plugin.base.model.Event

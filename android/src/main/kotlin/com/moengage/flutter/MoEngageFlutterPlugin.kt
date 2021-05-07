@@ -3,7 +3,7 @@ package com.moengage.flutter
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
-import com.moengage.core.Logger
+import com.moengage.core.internal.logger.Logger
 import com.moengage.plugin.base.PluginHelper
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding
