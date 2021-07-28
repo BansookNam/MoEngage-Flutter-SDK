@@ -112,7 +112,7 @@ extension MOFlutterPlugin: MoEPluginBridgeDelegate{
     }
     
     // MARK: Send Callback to Flutter
-    internal static func sendCallback(_ callbackName: String, withInfo info: NSString){
+    public static func sendCallback(_ callbackName: String, withInfo info: NSString){
         DispatchQueue.main.async {
             channel?.invokeMethod(callbackName, arguments: info)
         }
