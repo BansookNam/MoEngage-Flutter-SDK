@@ -16,6 +16,7 @@ import 'package:moengage_flutter/moe_push_service.dart';
 
 typedef void PushCallbackHandler(PushCampaign pushCampaign);
 typedef void InAppCallbackHandler(InAppCampaign inAppCampaign);
+typedef void OnMessageHandler(String message);
 typedef void PushTokenCallbackHandler(PushToken pushToken);
 
 class MoEngageFlutter {
@@ -25,6 +26,7 @@ class MoEngageFlutter {
 
   PushTokenCallbackHandler? _onPushTokenGenerated;
   PushCallbackHandler? _onPushClick;
+  OnMessageHandler? _onMessage;
   InAppCallbackHandler? _onInAppClick;
   InAppCallbackHandler? _onInAppShown;
   InAppCallbackHandler? _onInAppDismiss;
@@ -43,6 +45,10 @@ class MoEngageFlutter {
 
   void setUpPushCallbacks(PushCallbackHandler onPushClick) {
     _onPushClick = onPushClick;
+  }
+
+  void setOnMessageCallbacks(OnMessageHandler onMessage) {
+    _onMessage = onMessage;
   }
 
   /// set up callback APIs for in-app events
@@ -106,9 +112,15 @@ class MoEngageFlutter {
       }
       if (call.method == callbackOnInAppSelfHandled &&
           _onInAppSelfHandle != null) {
+      if (call.method == callbackOnInAppSelfHandled && _onInAppSelfHandle != null) {
         InAppCampaign? inAppCampaign = inAppCampaignFromJson(call.arguments);
         if (inAppCampaign != null) {
           _onInAppSelfHandle?.call(inAppCampaign);
+        }
+      }
+      if (call.method == callbackOnMessage && _onMessage != null) {
+        if (call.arguments != null) {
+          _onMessage?.call(call.arguments);
         }
       }
     } catch (exception) {
