@@ -1,18 +1,17 @@
 import 'dart:convert';
 
 import 'package:moengage_flutter/push_campaign.dart';
+import 'package:moengage_flutter/push_token.dart';
 import 'package:moengage_flutter/self_handled.dart';
 import 'package:moengage_flutter/constants.dart';
 import 'package:moengage_flutter/inapp_custom_action.dart';
 import 'package:moengage_flutter/navigation_action.dart';
 import 'package:moengage_flutter/properties.dart';
 import 'package:moengage_flutter/inapp_campaign.dart';
+import 'package:moengage_flutter/moe_push_service.dart';
 
 Map<String, dynamic> getEventPayload(
     String eventName, MoEProperties eventAttributes) {
-  if (eventAttributes == null) {
-    eventAttributes = MoEProperties();
-  }
   Map<String, dynamic> eventPayload = eventAttributes.getEventAttributeJson();
   eventPayload[keyEventName] = eventName;
   return eventPayload;
@@ -40,11 +39,15 @@ Map<String, dynamic> getOptOutTrackingPayload(
   return {keyAttributeType: type, keyState: shouldOptOutDataTracking};
 }
 
+Map<String, dynamic> getUpdateSdkStatePayload(bool shouldEnableSdk) {
+  return {keyIsSdkEnabled: shouldEnableSdk};
+}
+
 Map<String, dynamic> getMap(String key, dynamic value) {
   return <String, dynamic>{key: value};
 }
 
-InAppCampaign inAppCampaignFromJson(dynamic methodCallArgs) {
+InAppCampaign? inAppCampaignFromJson(dynamic methodCallArgs) {
   try {
     Map<String, dynamic> inAppCampaignMap = json.decode(methodCallArgs);
 
@@ -80,13 +83,13 @@ InAppCampaign inAppCampaignFromJson(dynamic methodCallArgs) {
     inAppCampaign.customAction = customActionFromCampaignMap(inAppCampaignMap);
 
     return inAppCampaign;
-  } catch (ex) {
-    print("error: inAppCampaignFromJson : $ex");
+  } catch (e) {
+    print("error: inAppCampaignFromJson():: $e");
   }
   return null;
 }
 
-SelfHandled selfHandledFromCampaignMap(Map<String, dynamic> inAppCampaignMap) {
+SelfHandled? selfHandledFromCampaignMap(Map<String, dynamic> inAppCampaignMap) {
   if (inAppCampaignMap.containsKey(keySelfHandled)) {
     Map<String, dynamic> selfHandledMap = inAppCampaignMap[keySelfHandled];
 
@@ -103,7 +106,7 @@ SelfHandled selfHandledFromCampaignMap(Map<String, dynamic> inAppCampaignMap) {
   }
 }
 
-NavigationAction navigationActionFromCampaignMap(
+NavigationAction? navigationActionFromCampaignMap(
     Map<String, dynamic> inAppCampaignMap) {
   if (inAppCampaignMap.containsKey(keyNavigation)) {
     Map<String, dynamic> navigationMap = inAppCampaignMap[keyNavigation];
@@ -116,7 +119,7 @@ NavigationAction navigationActionFromCampaignMap(
   }
 }
 
-CustomAction customActionFromCampaignMap(
+CustomAction? customActionFromCampaignMap(
     Map<String, dynamic> inAppCampaignMap) {
   if (inAppCampaignMap.containsKey(keyCustomAction)) {
     Map<String, dynamic> customActionMap = inAppCampaignMap[keyCustomAction];
@@ -128,7 +131,7 @@ CustomAction customActionFromCampaignMap(
   }
 }
 
-PushCampaign pushCampaignFromJson(dynamic methodCallArgs) {
+PushCampaign? pushCampaignFromJson(dynamic methodCallArgs) {
   try {
     Map<String, dynamic> pushCampaignMap = json.decode(methodCallArgs);
     String platform = pushCampaignMap.containsKey(keyPlatform)
@@ -146,16 +149,29 @@ PushCampaign pushCampaignFromJson(dynamic methodCallArgs) {
     Map<String, dynamic> clickedAction =
         pushCampaignMap.containsKey(keyClickedAction)
             ? pushCampaignMap[keyClickedAction]
-            : null;
+            : new Map();
 
     Map<String, dynamic> payload = pushCampaignMap.containsKey(keyPayload)
         ? pushCampaignMap[keyPayload]
-        : null;
+        : new Map();
 
     return PushCampaign(platform, isDefaultAction, clickedAction, payload);
-  } catch (ex) {
-    print("error: pushCampaignFromJson : $ex");
+  } catch (e) {
+    print("error: pushCampaignFromJson():: $e");
   }
 
+  return null;
+}
+
+PushToken? pushTokenFromJson(dynamic methodCallArgs) {
+  try {
+    Map<String, dynamic> pushTokenPayload = json.decode(methodCallArgs);
+    return PushToken(
+        pushTokenPayload[keyPlatform],
+        pushTokenPayload[keyPushToken],
+        MoEPushServiceExt.fromString(pushTokenPayload[keyPushService]));
+  } catch (exception) {
+    print("Error: pushTokenFromJson() : ${exception.toString()}");
+  }
   return null;
 }

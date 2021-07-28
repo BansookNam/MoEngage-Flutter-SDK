@@ -8,30 +8,37 @@ import 'package:moengage_flutter/geo_location.dart';
 import 'package:moengage_flutter/gender.dart';
 import 'package:moengage_flutter/constants.dart';
 import 'package:moengage_flutter/push_campaign.dart';
+import 'package:moengage_flutter/push_token.dart';
 import 'package:moengage_flutter/utils.dart';
 import 'package:moengage_flutter/moe_ios_core.dart';
 import 'package:moengage_flutter/moe_android_core.dart';
+import 'package:moengage_flutter/moe_push_service.dart';
 
 typedef void PushCallbackHandler(PushCampaign pushCampaign);
 typedef void InAppCallbackHandler(InAppCampaign inAppCampaign);
+typedef void PushTokenCallbackHandler(PushToken pushToken);
 
 class MoEngageFlutter {
   MethodChannel _channel = MethodChannel(channelName);
-  MoEAndroidCore _moEAndroid;
-  MoEiOSCore _moEiOS;
+  late MoEAndroidCore _moEAndroid;
+  late MoEiOSCore _moEiOS;
 
-  PushCallbackHandler _onPushClick;
-  InAppCallbackHandler _onInAppClick;
-  InAppCallbackHandler _onInAppShown;
-  InAppCallbackHandler _onInAppDismiss;
-  InAppCallbackHandler _onInAppCustomAction;
-  InAppCallbackHandler _onInAppSelfHandle;
+  PushTokenCallbackHandler? _onPushTokenGenerated;
+  PushCallbackHandler? _onPushClick;
+  InAppCallbackHandler? _onInAppClick;
+  InAppCallbackHandler? _onInAppShown;
+  InAppCallbackHandler? _onInAppDismiss;
+  InAppCallbackHandler? _onInAppCustomAction;
+  InAppCallbackHandler? _onInAppSelfHandle;
+
+  MoEngageFlutter() {
+    _moEAndroid = MoEAndroidCore(_channel);
+    _moEiOS = MoEiOSCore(_channel);
+  }
 
   void initialise() {
     _channel.setMethodCallHandler(_handler);
     _channel.invokeMethod(methodInitialise);
-    _moEAndroid = MoEAndroidCore(_channel);
-    _moEiOS = MoEiOSCore(_channel);
   }
 
   void setUpPushCallbacks(PushCallbackHandler onPushClick) {
@@ -40,11 +47,11 @@ class MoEngageFlutter {
 
   /// set up callback APIs for in-app events
   void setUpInAppCallbacks(
-      {InAppCallbackHandler onInAppClick,
-      InAppCallbackHandler onInAppShown,
-      InAppCallbackHandler onInAppDismiss,
-      InAppCallbackHandler onInAppCustomAction,
-      InAppCallbackHandler onInAppSelfHandle}) {
+      {InAppCallbackHandler? onInAppClick,
+      InAppCallbackHandler? onInAppShown,
+      InAppCallbackHandler? onInAppDismiss,
+      InAppCallbackHandler? onInAppCustomAction,
+      InAppCallbackHandler? onInAppSelfHandle}) {
     _onInAppClick = onInAppClick;
     _onInAppShown = onInAppShown;
     _onInAppDismiss = onInAppDismiss;
@@ -52,49 +59,63 @@ class MoEngageFlutter {
     _onInAppSelfHandle = onInAppSelfHandle;
   }
 
+  void setUpPushTokenCallback(PushTokenCallbackHandler onPushTokenGenerated) {
+    _onPushTokenGenerated = onPushTokenGenerated;
+  }
+
   Future<dynamic> _handler(MethodCall call) async {
     print("Received callback in dart. Payload" + call.toString());
     try {
+      if (call.method == callbackPushTokenGenerated &&
+          _onPushTokenGenerated != null) {
+        PushToken? pushToken = pushTokenFromJson(call.arguments);
+        if (pushToken != null) {
+          _onPushTokenGenerated?.call(pushToken);
+        }
+      }
       if (call.method == callbackOnPushClick && _onPushClick != null) {
-        PushCampaign pushCampaign = pushCampaignFromJson(call.arguments);
+        PushCampaign? pushCampaign = pushCampaignFromJson(call.arguments);
         if (pushCampaign != null) {
-          _onPushClick(pushCampaign);
+          _onPushClick?.call(pushCampaign);
         }
       }
       if (call.method == callbackOnInAppClicked && _onInAppClick != null) {
-        InAppCampaign inAppCampaign = inAppCampaignFromJson(call.arguments);
+        InAppCampaign? inAppCampaign = inAppCampaignFromJson(call.arguments);
         if (inAppCampaign != null) {
-          _onInAppClick(inAppCampaign);
+          _onInAppClick?.call(inAppCampaign);
         }
       }
       if (call.method == callbackOnInAppShown && _onInAppShown != null) {
-        InAppCampaign inAppCampaign = inAppCampaignFromJson(call.arguments);
+        InAppCampaign? inAppCampaign = inAppCampaignFromJson(call.arguments);
         if (inAppCampaign != null) {
-          _onInAppShown(inAppCampaign);
+          _onInAppShown?.call(inAppCampaign);
         }
       }
       if (call.method == callbackOnInAppDismissed && _onInAppDismiss != null) {
-        InAppCampaign inAppCampaign = inAppCampaignFromJson(call.arguments);
+        InAppCampaign? inAppCampaign = inAppCampaignFromJson(call.arguments);
         if (inAppCampaign != null) {
-          _onInAppDismiss(inAppCampaign);
+          _onInAppDismiss?.call(inAppCampaign);
         }
       }
       if (call.method == callbackOnInAppCustomAction &&
           _onInAppCustomAction != null) {
-        InAppCampaign inAppCampaign = inAppCampaignFromJson(call.arguments);
+        InAppCampaign? inAppCampaign = inAppCampaignFromJson(call.arguments);
         if (inAppCampaign != null) {
-          _onInAppCustomAction(inAppCampaign);
+          _onInAppCustomAction?.call(inAppCampaign);
         }
       }
       if (call.method == callbackOnInAppSelfHandled &&
           _onInAppSelfHandle != null) {
-        InAppCampaign inAppCampaign = inAppCampaignFromJson(call.arguments);
+        InAppCampaign? inAppCampaign = inAppCampaignFromJson(call.arguments);
         if (inAppCampaign != null) {
-          _onInAppSelfHandle(inAppCampaign);
+          _onInAppSelfHandle?.call(inAppCampaign);
         }
       }
     } catch (exception) {
-      print(exception);
+      print("MoEngageFlutter _handler() : " +
+          call.toString() +
+          " has an Exception: " +
+          exception.toString());
     }
   }
 
@@ -108,7 +129,10 @@ class MoEngageFlutter {
   }
 
   /// Tracks an event with the given attributes.
-  void trackEvent(String eventName, MoEProperties eventAttributes) {
+  void trackEvent(String eventName, [MoEProperties? eventAttributes]) {
+    if (eventAttributes == null) {
+      eventAttributes = MoEProperties();
+    }
     if (Platform.isAndroid) {
       _moEAndroid.trackEvent(eventName, eventAttributes);
     } else if (Platform.isIOS) {
@@ -401,7 +425,7 @@ class MoEngageFlutter {
   /// Note: This API is only for Android Platform.
   void passFCMPushToken(String pushToken) {
     if (Platform.isAndroid) {
-      _moEAndroid.passPushToken(pushToken, pushServiceFCM);
+      _moEAndroid.passPushToken(pushToken, MoEPushService.fcm);
     }
   }
 
@@ -409,7 +433,7 @@ class MoEngageFlutter {
   /// Note: This API is only for Android Platform.
   void passFCMPushPayload(Map<String, dynamic> payload) {
     if (Platform.isAndroid) {
-      _moEAndroid.passPushPayload(payload, pushServiceFCM);
+      _moEAndroid.passPushPayload(payload, MoEPushService.fcm);
     }
   }
 
@@ -417,7 +441,27 @@ class MoEngageFlutter {
   /// Note: This API is only for Android Platform.
   void passPushKitPushToken(String pushToken) {
     if (Platform.isAndroid) {
-      _moEAndroid.passPushToken(pushToken, pushServicePushKit);
+      _moEAndroid.passPushToken(pushToken, MoEPushService.push_kit);
+    }
+  }
+
+  /// API to enable SDK usage.
+  /// Note: By default the SDK is enabled, should only be called to enabled the
+  /// SDK if you have called [disableSdk()] at some point.
+  void enableSdk() {
+    if (Platform.isAndroid) {
+      _moEAndroid.updateSdkState(true);
+    } else if (Platform.isIOS) {
+      _moEiOS.updateSdkState(true);
+    }
+  }
+
+  /// API to disable all features of the SDK.
+  void disableSdk() {
+    if (Platform.isAndroid) {
+      _moEAndroid.updateSdkState(false);
+    } else if (Platform.isIOS) {
+      _moEiOS.updateSdkState(false);
     }
   }
 }

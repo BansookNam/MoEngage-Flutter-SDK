@@ -1,5 +1,37 @@
 # MoEngage Flutter Plugin
 
+### 4.0.2 (21st July 2021)
+- Bugfix
+  - Calling MoEngage APIs when application in background is not working on Android.
+
+### 4.0.1 *(15th June 2021)*
+- Bugfix: 
+    - Push click notification callback is not received when clicked action is null.
+    
+### 4.0.0 *(12th May 2021)*
+- Migrated the main library to null safety.
+    - Require Dart 2.12 or greater.
+- Bumped flutter dependency constraint to min version `1.17.0`
+- Android
+    - Native SDK updated to support version `11.2.00` and above.
+    
+### 3.0.1 *(28th April 2021)*
+- iOS
+    - Added ObjC support for `MOFlutterInitializer` class
+    - PodSpec changes to set deployment target to iOS 10.0.  
+ 
+### 3.0.0 *(26th February 2021)*
+- Android 
+    - Native SDK updated to support version `11.0.04` and above.
+    - Plugin Base `2.0.00`
+- iOS 
+    - Plugin now supports iOS 10.0 and above.
+    - Native Dependencies updated to support MoEngage-iOS-SDK `7.*` and above
+    - Base plugin version dependency updated to `~> 2.0.2`.
+- Added Dart APIs to enable and disable MoEngage Sdk.
+- Added Dart API to register a callback for push token generated event.
+
+
 ### 2.0.3 *(15th February 2021)*
 - Android artifacts use manven central instead of Jcenter.
 - Native SDK version `10.6.01`

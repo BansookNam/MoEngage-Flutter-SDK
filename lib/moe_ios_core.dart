@@ -9,9 +9,7 @@ import 'package:moengage_flutter/geo_location.dart';
 class MoEiOSCore {
   MethodChannel _channel;
 
-  MoEiOSCore(MethodChannel channel) {
-    _channel = channel;
-  }
+  MoEiOSCore(this._channel);
 
   void enableSDKLogs() {
     _channel.invokeMethod(methodEnableSDKLogs);
@@ -169,5 +167,10 @@ class MoEiOSCore {
 
   void logout() {
     _channel.invokeMethod(methodLogout);
+  }
+
+  void updateSdkState(bool shouldEnableSdk) {
+    var sdkStatePayload = getUpdateSdkStatePayload(shouldEnableSdk);
+    _channel.invokeMethod(methodUpdateSdkState, sdkStatePayload);
   }
 }
