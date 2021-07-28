@@ -110,8 +110,6 @@ class MoEngageFlutter {
           _onInAppCustomAction?.call(inAppCampaign);
         }
       }
-      if (call.method == callbackOnInAppSelfHandled &&
-          _onInAppSelfHandle != null) {
       if (call.method == callbackOnInAppSelfHandled && _onInAppSelfHandle != null) {
         InAppCampaign? inAppCampaign = inAppCampaignFromJson(call.arguments);
         if (inAppCampaign != null) {
