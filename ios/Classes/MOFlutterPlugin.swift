@@ -59,8 +59,6 @@ public class MOFlutterPlugin: NSObject, FlutterPlugin {
                 MoEPluginBridge.sharedInstance()?.setInAppContexts(payload)
             case MOFlutterConstants.MethodNames.kOptOutTracking:
                 MoEPluginBridge.sharedInstance()?.optOutTracking(payload)
-            case MOFlutterConstants.MethodNames.kUpdateSDKState:
-                MoEPluginBridge.sharedInstance()?.updateSDKState(payload)
             default:
                 print("Invalid invocation: \(call.method)")
             }
@@ -92,8 +90,6 @@ extension MOFlutterPlugin: MoEPluginBridgeDelegate{
     // MARK: Utils
     func getCallbackName(forEventName name: String) -> String?{
         switch name {
-        case kEventNamePushTokenGenerated:
-            return MOFlutterConstants.CallbackNames.kPushTokenGenerated
         case kEventNamePushClicked:
             return MOFlutterConstants.CallbackNames.kPushClicked
         case kEventNameInAppCampaignShown:
