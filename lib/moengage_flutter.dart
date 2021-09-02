@@ -17,6 +17,7 @@ import 'package:moengage_flutter/moe_push_service.dart';
 typedef void PushCallbackHandler(PushCampaign pushCampaign);
 typedef void InAppCallbackHandler(InAppCampaign inAppCampaign);
 typedef void OnMessageHandler(String message);
+typedef void OnDeeplinkHandler(String url);
 typedef void PushTokenCallbackHandler(PushToken pushToken);
 
 class MoEngageFlutter {
@@ -27,6 +28,7 @@ class MoEngageFlutter {
   PushTokenCallbackHandler? _onPushTokenGenerated;
   PushCallbackHandler? _onPushClick;
   OnMessageHandler? _onMessage;
+  OnDeeplinkHandler? _onDeeplink;
   InAppCallbackHandler? _onInAppClick;
   InAppCallbackHandler? _onInAppShown;
   InAppCallbackHandler? _onInAppDismiss;
@@ -49,6 +51,10 @@ class MoEngageFlutter {
 
   void setOnMessageCallbacks(OnMessageHandler onMessage) {
     _onMessage = onMessage;
+  }
+
+  void setOnDeeplinkCallbacks(OnDeeplinkHandler onDeeplink) {
+    _onDeeplink = onDeeplink;
   }
 
   /// set up callback APIs for in-app events
@@ -119,6 +125,11 @@ class MoEngageFlutter {
       if (call.method == callbackOnMessage && _onMessage != null) {
         if (call.arguments != null) {
           _onMessage?.call(call.arguments);
+        }
+      }
+      if (call.method == callbackOnDeeplink && _onDeeplink != null) {
+        if (call.arguments != null) {
+          _onDeeplink?.call(call.arguments);
         }
       }
     } catch (exception) {

@@ -30,6 +30,7 @@ const String callbackOnInAppCustomAction = "onInAppCustomAction";
 const String callbackOnInAppSelfHandled = "onInAppSelfHandle";
 const String callbackPushTokenGenerated = "onPushTokenGenerated";
 const String callbackOnMessage = "onMessage";
+const String callbackOnDeeplink = "onDeeplink";
 
 // Gender Value Constants
 const String genderMale = "male";
